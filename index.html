@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Extractor & Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-lg shadow-lg p-8">
+            <!-- Header -->
+            <div class="flex items-center gap-3 mb-6">
+                <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+                <h1 class="text-3xl font-bold text-gray-800">Email Extractor</h1>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Input Section -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Paste text containing emails:
+                    </label>
+                    <textarea
+                        id="inputText"
+                        placeholder="Paste any text here... emails will be automatically detected&#10;Example: Contact us at hello@example.com or support@test.org"
+                        class="w-full h-40 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    ></textarea>
+                    <button
+                        onclick="extractEmails()"
+                        class="mt-3 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+                    >
+                        Extract Emails
+                    </button>
+                </div>
+
+                <!-- Extracted Emails Section -->
+                <div id="extractedSection" class="hidden bg-green-50 border border-green-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-green-800 mb-2">
+                        Found <span id="extractedCount">0</span> email(s):
+                    </h3>
+                    <div id="extractedList" class="flex flex-wrap gap-2 mb-4"></div>
+                    <div class="flex gap-3">
+                        <button
+                            onclick="downloadTxt()"
+                            class="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
+                            Download TXT
+                        </button>
+                        <button
+                            onclick="saveToCollection()"
+                            class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path>
+                            </svg>
+                            Save to Collection
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Saved Collection Section -->
+                <div id="savedSection" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-blue-800 mb-2">
+                        Email Collection (<span id="savedCount">0</span> unique):
+                    </h3>
+                    <div class="max-h-40 overflow-y-auto mb-4">
+                        <div id="savedList" class="flex flex-wrap gap-2"></div>
+                    </div>
+                    <div class="flex gap-3 flex-wrap">
+                        <button
+                            onclick="downloadCollectionTxt()"
+                            class="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
+                            Download TXT
+                        </button>
+                        <button
+                            onclick="downloadJson()"
+                            class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
+                            Download JSON
+                        </button>
+                        <button
+                            onclick="clearAll()"
+                            class="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                            Clear All
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Section -->
+            <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                <h4 class="font-semibold text-gray-700 mb-2">How it works:</h4>
+                <ul class="text-sm text-gray-600 space-y-1">
+                    <li>• Paste text containing emails and click "Extract Emails"</li>
+                    <li>• Download as TXT file or save to your collection</li>
+                    <li>• Collection automatically removes duplicates when combining</li>
+                    <li>• Export your full collection as JSON anytime</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let extractedEmails = [];
+        let savedEmails = [];
+
+        // Load saved emails from localStorage on page load
+        function loadFromStorage() {
+            const stored = localStorage.getItem('emailCollection');
+            if (stored) {
+                savedEmails = JSON.parse(stored);
+                displaySaved();
+            }
+        }
+
+        // Save emails to localStorage
+        function saveToStorage() {
+            localStorage.setItem('emailCollection', JSON.stringify(savedEmails));
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', loadFromStorage);
+
+        function extractEmails() {
+            const text = document.getElementById('inputText').value;
+            const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+            const found = text.match(emailRegex) || [];
+            extractedEmails = [...new Set(found)];
+            
+            if (extractedEmails.length > 0) {
+                displayExtracted();
+            } else {
+                alert('No emails found in the text!');
+            }
+        }
+
+        function displayExtracted() {
+            const section = document.getElementById('extractedSection');
+            const list = document.getElementById('extractedList');
+            const count = document.getElementById('extractedCount');
+            
+            section.classList.remove('hidden');
+            count.textContent = extractedEmails.length;
+            list.innerHTML = extractedEmails.map(email => 
+                `<span class="px-3 py-1 bg-white border border-green-300 rounded-full text-sm">${email}</span>`
+            ).join('');
+        }
+
+        function displaySaved() {
+            const section = document.getElementById('savedSection');
+            const list = document.getElementById('savedList');
+            const count = document.getElementById('savedCount');
+            
+            if (savedEmails.length > 0) {
+                section.classList.remove('hidden');
+                count.textContent = savedEmails.length;
+                list.innerHTML = savedEmails.map(email => 
+                    `<span class="px-3 py-1 bg-white border border-blue-300 rounded-full text-sm">${email}</span>`
+                ).join('');
+            } else {
+                section.classList.add('hidden');
+            }
+        }
+
+        function saveToCollection() {
+            savedEmails = [...new Set([...savedEmails, ...extractedEmails])];
+            saveToStorage();
+            displaySaved();
+            
+            extractedEmails = [];
+            document.getElementById('inputText').value = '';
+            document.getElementById('extractedSection').classList.add('hidden');
+        }
+
+        function downloadTxt() {
+            const content = extractedEmails.join('\n');
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'emails.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function downloadJson() {
+            const data = {
+                emails: savedEmails,
+                count: savedEmails.length,
+                exportedAt: new Date().toISOString()
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'emails.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function clearAll() {
+            if (confirm('Are you sure you want to clear all saved emails?')) {
+                savedEmails = [];
+                extractedEmails = [];
+                localStorage.removeItem('emailCollection');
+                document.getElementById('inputText').value = '';
+                document.getElementById('extractedSection').classList.add('hidden');
+                document.getElementById('savedSection').classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
