@@ -7,7 +7,38 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
-    <div class="max-w-4xl mx-auto">
+    <div class="max-w-6xl mx-auto flex gap-6 flex-col lg:flex-row">
+        <!-- Left Sidebar -->
+        <div class="lg:w-64 flex-shrink-0">
+            <!-- Visitor Counter Card -->
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-4">
+                <div class="text-center">
+                    <div class="text-4xl mb-2">👥</div>
+                    <p class="text-sm text-gray-600 mb-1">You are visitor</p>
+                    <p class="text-3xl font-bold text-indigo-600" id="visitorCount">0</p>
+                    <p class="text-xs text-gray-500 mt-2">Thank you!</p>
+                </div>
+            </div>
+
+            <!-- More Tools Card -->
+            <div class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg shadow-lg p-6 text-white">
+                <div class="text-center">
+                    <div class="text-3xl mb-3">🛠️</div>
+                    <h3 class="font-bold text-lg mb-2">More Free Tools</h3>
+                    <p class="text-sm mb-4 opacity-90">Check out my portfolio for more useful tools!</p>
+                    <a 
+                        href="https://salmanck66.github.io/Portfolio/" 
+                        target="_blank"
+                        class="inline-block bg-white text-indigo-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition text-sm"
+                    >
+                        Visit Portfolio →
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1">
         <div class="bg-white rounded-lg shadow-lg p-8">
             <!-- Header -->
             <div class="flex items-center gap-3 mb-6">
@@ -196,6 +227,17 @@
             const a = document.createElement('a');
             a.href = url;
             a.download = 'emails.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function downloadCollectionTxt() {
+            const content = savedEmails.join('\n');
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'email-collection.txt';
             a.click();
             URL.revokeObjectURL(url);
         }
